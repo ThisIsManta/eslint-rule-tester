@@ -1,0 +1,40 @@
+{
+	"name": "eslint-rule-tester",
+	"version": "0.0.0",
+	"description": "A command-line interface for running ESLint rule unit tests",
+	"type": "module",
+	"bin": "index.js",
+	"files": [
+		"index.js",
+		"test.js"
+	],
+	"scripts": {
+		"test": "vitest --no-watch",
+		"version": "npm publish"
+	},
+	"keywords": [
+		"eslint"
+	],
+	"author": "thisismanta@gmail.com",
+	"license": "MIT",
+	"packageManager": "pnpm@9.8.0",
+	"pnpm": {
+		"executionEnv": {
+			"nodeVersion": "20.17.0"
+		}
+	},
+	"peerDependencies": {
+		"eslint": ">=9.0.0"
+	},
+	"devDependencies": {
+		"@thisismanta/semantic-version": "^8.0.1",
+		"@types/node": "~20.16.1",
+		"eslint": "^9.9.0",
+		"vitest": "^2.0.5",
+		"lefthook": "^1.7.14"
+	},
+	"dependencies": {
+		"@thisismanta/pessimist": "^1.2.0",
+		"chalk": "^5.3.0"
+	}
+}

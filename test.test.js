@@ -66,8 +66,8 @@ it('returns minus-one code, given no test case at all', () => {
 
 	expect(errorCount).toBe(-1)
 	expect(log.mock.calls.join('\n')).toMatchInlineSnapshot(`
-		"*️⃣ foo (0)
-		*️⃣ hoo (0)
+		"⚪ foo (0)
+		⚪ hoo (0)
 
 		 PASS  0"
 	`)

@@ -115,7 +115,7 @@ export default function test(
 
 	for (const { ruleName, ruleModule, totalTestCases, selectTestCases } of ruleList) {
 		if (totalTestCases.length === 0) {
-			log('*️⃣ ' + ruleName + ` (0)`)
+			log('⚪ ' + ruleName + ` (0)`)
 			continue
 		}
 

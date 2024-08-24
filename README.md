@@ -5,7 +5,7 @@ A command-line interface for running [ESLint rule unit tests](https://eslint.org
 ```sh
 npm exec eslint-rule-tester <...path>
 ```
-where `<path>` can be one or more of..
+where `<...path>` is one or more [Glob patterns](https://www.npmjs.com/package/glob#Glob-Primer), which can be mixed of..
 - JavaScript file exporting [ESLint plugin](https://eslint.org/docs/latest/extend/plugins), for example,  
   ```js
   module.exports = {
@@ -26,7 +26,7 @@ where `<path>` can be one or more of..
   }
   ```
 
-which the command returns the status code of **non-pass** test case count.
+The command returns the status code representing the number of **non-pass** test results.
 
 Optionally, the command accepts the following arguments:
 

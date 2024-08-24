@@ -3,13 +3,18 @@
 // @ts-check
 
 import fp from 'path'
+import { globSync } from 'glob'
+import { pathToFileURL } from 'url'
 import pessimist from '@thisismanta/pessimist'
 import test from './test.js'
 
-const { bail, silent, ...filePathList } = pessimist.parseArguments(process.argv.slice(2), {
+const { bail, silent, ...inputPathList } = pessimist.parseArguments(process.argv.slice(2), {
 	bail: false,
 	silent: false,
 })
+
+const filePathList = globSync(Array.from(inputPathList), { absolute: true })
+	.map(path => pathToFileURL(path).href)
 
 if (filePathList.length === 0) {
 	throw new Error('Expected one or more file arguments of ESLint plugins or rules.')
@@ -20,7 +25,7 @@ if (filePathList.length === 0) {
  */
 const rules = {}
 
-for (const filePath of Array.from(filePathList)) {
+for (const filePath of filePathList) {
 	const module = (await import(filePath)).default
 
 	if (typeof module !== 'object' || module === null) {

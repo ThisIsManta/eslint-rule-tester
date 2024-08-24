@@ -16,8 +16,11 @@ const { bail, silent, ...inputPathList } = pessimist.parseArguments(process.argv
 const filePathList = globSync(Array.from(inputPathList), { absolute: true })
 	.map(path => pathToFileURL(path).href)
 
+// Sort ascending as Glob does not guarantee array order
+filePathList.sort()
+
 if (filePathList.length === 0) {
-	throw new Error('Expected one or more file arguments of ESLint plugins or rules.')
+	throw new Error('Expected one or more arguments pointing to ESLint plugins or rules.')
 }
 
 /**

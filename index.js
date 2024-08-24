@@ -20,26 +20,46 @@ const filePathList = globSync(Array.from(inputPathList), { absolute: true })
 filePathList.sort()
 
 if (filePathList.length === 0) {
-	throw new Error('Expected one or more arguments pointing to ESLint plugins or rules.')
+	throw new Error('Expected one or more command-line arguments pointing to ESLint plugins or rules.')
 }
 
 /**
  * @type {Record<string, import('eslint').Rule.RuleModule & import('./test.js').Tests>}
  */
 const rules = {}
-
 for (const filePath of filePathList) {
 	const module = (await import(filePath)).default
 
-	if (typeof module !== 'object' || module === null) {
-		throw new Error(`Expected "${filePath}" file to be an ESLint plugin or rule.`)
-	}
+	if (
+		typeof module === 'object' && module &&
+		'rules' in module && typeof module.rules === 'object' && module.rules
+	) {
+		const pluginShortName = (() => {
+			if ('meta' in module && typeof module.meta?.name === 'string') {
+				return module.meta.name + '/'
+			}
 
-	if ('rules' in module && typeof module.rules === 'object' && module.rules !== null) {
-		Object.assign(rules, module.rules)
+			// Backward compatibility
+			if (typeof module.name === 'string') {
+				return module.name + '/'
+			}
+
+			return ''
+		})().replace(/^eslint-plugin-/, '')
+
+		for (const ruleName in module.rules) {
+			rules[pluginShortName + ruleName] = module.rules[ruleName]
+		}
+
+	} else if (
+		typeof module === 'object' && module &&
+		'create' in module && typeof module.create === 'function'
+	) {
+		const derivedRuleName = fp.basename(filePath, fp.extname(filePath))
+		rules[derivedRuleName] = module
+
 	} else {
-		const dummyRuleName = fp.basename(filePath, fp.extname(filePath))
-		rules[dummyRuleName] = module
+		throw new Error(`Expected file "${filePath}" to be an ESLint plugin or rule.`)
 	}
 }
 

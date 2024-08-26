@@ -13,15 +13,19 @@ const { bail, silent, ...inputPathList } = pessimist.parseArguments(process.argv
 	silent: false,
 })
 
+if (inputPathList.length === 0) {
+	throw new Error('Expected one or more command-line arguments pointing to files containing ESLint plugins or rules.')
+}
+
 const filePathList = globSync(Array.from(inputPathList), { absolute: true })
 	.map(path => pathToFileURL(path).href)
 
+if (filePathList.length === 0) {
+	throw new Error('Expected the given command-line arguments to match at least a JavaScript file but got none.')
+}
+
 // Sort ascending as Glob does not guarantee array order
 filePathList.sort()
-
-if (filePathList.length === 0) {
-	throw new Error('Expected one or more command-line arguments pointing to ESLint plugins or rules.')
-}
 
 /**
  * @type {Record<string, import('eslint').Rule.RuleModule & import('./test.js').Tests>}

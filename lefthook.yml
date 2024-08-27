@@ -5,4 +5,4 @@ commit-msg:
 pre-commit:
   commands:
     test:
-      run: pnpm run test
+      run: npm run test

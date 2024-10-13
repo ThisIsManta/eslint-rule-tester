@@ -1,4 +1,4 @@
-import { vi, afterEach, afterAll, it, expect } from 'vitest'
+import { vi, afterEach, it, expect } from 'vitest'
 
 import test from './test.js'
 
@@ -18,10 +18,6 @@ vi.mock('chalk', () => ({
 
 afterEach(() => {
 	vi.clearAllMocks()
-})
-
-afterAll(() => {
-	vi.restoreAllMocks()
 })
 
 it('returns minus-one code, given no test case at all', () => {
@@ -60,14 +56,21 @@ it('returns minus-one code, given no test case at all', () => {
 		}
 	}
 
+	const input = {
+		filePath: 'plugin.js',
+		module: {
+			rules
+		}
+	}
+
 	const log = vi.fn()
 	const err = vi.fn()
-	const errorCount = test(rules, { log, err })
+	const errorCount = test([input], { log, err })
 
 	expect(errorCount).toBe(-1)
 	expect(log.mock.calls.join('\n')).toMatchInlineSnapshot(`
-		"⚪ foo (0)
-		⚪ hoo (0)
+		"⚪ plugin/foo (0)
+		⚪ plugin/hoo (0)
 
 		 PASS  0"
 	`)
@@ -96,13 +99,20 @@ it('returns zero code, given all passing test case', () => {
 		}
 	}
 
+	const input = {
+		filePath: 'plugin.js',
+		module: {
+			rules
+		}
+	}
+
 	const log = vi.fn()
 	const err = vi.fn()
-	const errorCount = test(rules, { log, err })
+	const errorCount = test([input], { log, err })
 
 	expect(errorCount).toBe(0)
 	expect(log.mock.calls.join('\n')).toMatchInlineSnapshot(`
-		"🟢 foo (2)
+		"🟢 plugin/foo (2)
 
 		 PASS  2"
 	`)
@@ -131,9 +141,16 @@ it('returns non-zero code, given no passing test case', () => {
 		}
 	}
 
+	const input = {
+		filePath: 'plugin.js',
+		module: {
+			rules
+		}
+	}
+
 	const log = vi.fn()
 	const err = vi.fn()
-	const errorCount = test(rules, { log, err })
+	const errorCount = test([input], { log, err })
 
 	expect(errorCount).toBe(2)
 	expect(log.mock.calls.join('\n')).toMatchInlineSnapshot(`
@@ -143,12 +160,12 @@ it('returns non-zero code, given no passing test case', () => {
 		 FAIL  2"
 	`)
 	expect(err.mock.calls.join('\n')).toMatchInlineSnapshot(`
-		"🔴 foo (2/2)
+		"🔴 plugin/foo (2/2)
 
 		   code: 1 void(0)
 		   Should have no errors but had 1: [
 		     {
-		       ruleId: 'rule-to-test/foo',
+		       ruleId: 'rule-to-test/plugin/foo',
 		       severity: 1,
 		       message: 'bar',
 		       line: 1,
@@ -186,19 +203,26 @@ it('returns exactly one code, given bailing out', () => {
 		}
 	}
 
+	const input = {
+		filePath: 'plugin.js',
+		module: {
+			rules
+		}
+	}
+
 	const log = vi.fn()
 	const err = vi.fn()
-	const errorCount = test(rules, { bail: true, log, err })
+	const errorCount = test([input], { bail: true, log, err })
 
 	expect(errorCount).toBe(1)
 	expect(log.mock.calls.join('\n')).toMatchInlineSnapshot(`""`)
 	expect(err.mock.calls.join('\n')).toMatchInlineSnapshot(`
-		"🔴 foo (1/2)
+		"🔴 plugin/foo (1/2)
 
 		   code: 1 void(0)
 		   Should have no errors but had 1: [
 		     {
-		       ruleId: 'rule-to-test/foo',
+		       ruleId: 'rule-to-test/plugin/foo',
 		       severity: 1,
 		       message: 'bar',
 		       line: 1,
@@ -233,14 +257,21 @@ it('runs exclusive test cases that have `only` field set to true', () => {
 		},
 	}
 
+	const input = {
+		filePath: 'plugin.js',
+		module: {
+			rules
+		}
+	}
+
 	const log = vi.fn()
 	const err = vi.fn()
-	const errorCount = test(rules, { log, err })
+	const errorCount = test([input], { log, err })
 
 	expect(errorCount).toBe(1)
 	expect(rules.foo.create).toHaveBeenCalled()
 	expect(log.mock.calls.join('\n')).toMatchInlineSnapshot(`
-		"🟡 foo (1/2)
+		"🟡 plugin/foo (1/2)
 
 		 SKIP  1
 		 PASS  1"
@@ -312,9 +343,16 @@ it('runs exclusive test cases that are wrapped with `only` function', () => {
 		}
 	}
 
+	const input = {
+		filePath: 'plugin.js',
+		module: {
+			rules
+		}
+	}
+
 	const log = vi.fn()
 	const err = vi.fn()
-	const errorCount = test(rules, { log, err })
+	const errorCount = test([input], { log, err })
 
 	expect(errorCount).toBe(5)
 	expect(rules.foo.create).toHaveBeenCalled()
@@ -322,10 +360,10 @@ it('runs exclusive test cases that are wrapped with `only` function', () => {
 	expect(rules.hoo.create).toHaveBeenCalled()
 	expect(rules.loo.create).not.toHaveBeenCalled()
 	expect(log.mock.calls.join('\n')).toMatchInlineSnapshot(`
-		"⏩ loo (3)
-		🟡 foo (2/4)
-		🟢 goo (3)
-		🟢 hoo (3)
+		"⏩ plugin/loo (3)
+		🟡 plugin/foo (2/4)
+		🟢 plugin/goo (3)
+		🟢 plugin/hoo (3)
 
 		 SKIP  5
 		 PASS  8"
@@ -356,15 +394,85 @@ it('supports string in valid test cases', () => {
 		}
 	}
 
+	const input = {
+		filePath: 'plugin.js',
+		module: {
+			rules
+		}
+	}
+
 	const log = vi.fn()
 	const err = vi.fn()
-	const errorCount = test(rules, { log, err })
+	const errorCount = test([input], { log, err })
 
 	expect(errorCount).toBe(0)
 	expect(log.mock.calls.join('\n')).toMatchInlineSnapshot(`
-		"🟢 foo (2)
+		"🟢 plugin/foo (2)
 
 		 PASS  2"
+	`)
+	expect(err).not.toHaveBeenCalled()
+})
+
+it('accepts rules, plugins and configs as inputs', () => {
+	const rules = {
+		foo: {
+			create(context) {
+				return {
+					Program(node) {
+						if (node.body.length > 0) {
+							context.report({
+								node,
+								message: 'bar'
+							})
+						}
+					}
+				}
+			},
+			tests: {
+				valid: [
+					{ code: '' }
+				],
+			}
+		}
+	}
+
+	const rule = {
+		filePath: 'rule.js',
+		module: rules.foo
+	}
+
+	const plugin = {
+		filePath: 'plugin.js',
+		module: {
+			meta: { name: 'plugin' },
+			rules
+		}
+	}
+
+	const config = {
+		filePath: 'eslint.config.js',
+		module: [{
+			plugins: {
+				ghost: plugin.module
+			},
+			rules: {
+				'ghost/foo': 'error'
+			}
+		}]
+	}
+
+	const log = vi.fn()
+	const err = vi.fn()
+	const errorCount = test([rule, plugin, config], { log, err })
+
+	expect(errorCount).toBe(0)
+	expect(log.mock.calls.join('\n')).toMatchInlineSnapshot(`
+		"🟢 rule (1)
+		🟢 plugin/foo (1)
+		🟢 ghost/foo (1)
+
+		 PASS  3"
 	`)
 	expect(err).not.toHaveBeenCalled()
 })

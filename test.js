@@ -1,10 +1,11 @@
 // @ts-check
 
+import fp from 'path'
 import { RuleTester } from 'eslint'
 import chalk from 'chalk'
 
 /**
- * @typedef {{ tests: { valid?: Array<import('eslint').RuleTester.ValidTestCase>, invalid?: Array<import('eslint').RuleTester.InvalidTestCase> } }} Tests
+ * @typedef {{ tests?: { valid?: Array<import('eslint').RuleTester.ValidTestCase>, invalid?: Array<import('eslint').RuleTester.InvalidTestCase> } }} Tests
  */
 
 /**
@@ -42,53 +43,125 @@ export function only(input) {
 global.only = only
 
 /**
- * @param {Record<string, import('eslint').Rule.RuleModule & Tests>} rules
+ * @param {Array<{ filePath: string, module: any }>} fileList
  * @param {{ bail: boolean, log: (line: string) => void, err: (line: string) => void }} [options={ bail: false, log: console.log, err: console.error }]
  * @returns {number} number of non-pass test cases
  */
 export default function test(
-	rules,
+	fileList,
 	{ bail, log, err } = { bail: false, log: console.log, err: console.log }
 ) {
-	// See https://eslint.org/docs/latest/integrate/nodejs-api#ruletester
-	const tester = new RuleTester({
-		languageOptions: {
-			ecmaVersion: 'latest',
-			sourceType: 'module',
-		}
-	})
+	const normalizedRuleConfigList = fileList.flatMap(
+		/**
+		 * @return {Array<Omit<import('eslint').Linter.Config, 'rules'> & { rules: Record<string, import('eslint').Rule.RuleModule & import('./test.js').Tests> }>}
+		 */
+		({ filePath, module }) => {
+			const fileName = fp.basename(filePath, fp.extname(filePath))
 
-	const oneOrMoreTestCaseIsSkipped = Object.values(rules).some(ruleModule =>
-		ruleModule.tests?.valid?.some(testCase =>
-			typeof testCase === 'object' && testCase.only
-		) ||
-		ruleModule.tests?.invalid?.some(testCase =>
-			testCase.only
-		)
+			if (
+				typeof module === 'object' &&
+				module &&
+				'rules' in module &&
+				typeof module.rules === 'object' &&
+				module.rules &&
+				Object.values(module.rules).every(ruleModule => typeof ruleModule === 'object' && ruleModule && 'create' in ruleModule)
+			) {
+				const pluginName = module.meta?.name ?? module.name ?? fileName
+
+				const language = Object.keys(module.languages || {})[0]
+
+				return [{
+					plugins: { [pluginName]: module },
+					language: language ? pluginName + '/' + language : undefined,
+					rules: Object.fromEntries(
+						Object.entries(module.rules)
+							.map(([ruleName, ruleModule]) => {
+								return [pluginName + '/' + ruleName, ruleModule]
+							})
+					),
+				}]
+
+			} else if (
+				typeof module === 'object' && module &&
+				'create' in module &&
+				typeof module.create === 'function'
+			) {
+				return [{
+					rules: { [fileName]: module }
+				}]
+
+			} else if (Array.isArray(module)) {
+				const configs = /** @type {Array<import('eslint').Linter.Config>} */ (module)
+				return configs.map(({ rules, ...config }) => ({
+					...config,
+					rules: Object.keys(rules || {}).reduce(
+						/**
+						 * @param {Record<string, import('eslint').Rule.RuleModule & import('./test.js').Tests>} rules 
+						 */
+						(rules, name) => {
+							const [pluginName, ruleName] = name.split('/')
+
+							const ruleModule = config.plugins?.[pluginName]?.rules?.[ruleName]
+							if (typeof ruleModule === 'object' && ruleModule) {
+								rules[name] = ruleModule
+							}
+
+							return rules
+						}, {}),
+				}))
+
+			} else {
+				throw new Error(`Expected file "${filePath}" to be an ESLint plugin or rule.`)
+			}
+		}
 	)
 
-	const ruleList = Object.entries(rules).map(([ruleName, ruleModule]) => {
-		/**
-		 * @type {Array<import('eslint').RuleTester.ValidTestCase | import('eslint').RuleTester.InvalidTestCase>}
-		 */
-		const totalTestCases = [
-			...(ruleModule.tests?.valid || []).map(testCase =>
-				typeof testCase === 'string' ? { code: testCase } : testCase
-			),
-			...(ruleModule.tests?.invalid || []),
-		]
-
-		const selectTestCases = totalTestCases.filter(testCase =>
-			oneOrMoreTestCaseIsSkipped ? testCase.only : true
+	const oneOrMoreTestCaseIsSkipped = normalizedRuleConfigList
+		.flatMap(config => Object.values(config.rules))
+		.some(ruleModule =>
+			ruleModule.tests?.valid?.some(testCase =>
+				typeof testCase === 'object' && testCase.only
+			) ||
+			ruleModule.tests?.invalid?.some(testCase =>
+				testCase.only
+			)
 		)
 
-		return {
-			ruleName,
-			ruleModule,
-			totalTestCases,
-			selectTestCases,
-		}
-	})
+	const ruleList = normalizedRuleConfigList
+		.flatMap(({ rules, ...config }) =>
+			Object.entries(rules)
+				.map(([ruleName, ruleModule]) =>
+					({ ruleName, ruleModule, config })
+				))
+		.map(({ ruleName, ruleModule, config }) => {
+			/**
+			 * @type {Array<import('eslint').RuleTester.ValidTestCase | import('eslint').RuleTester.InvalidTestCase>}
+			 */
+			const totalTestCases = [
+				...(ruleModule.tests?.valid || []).map(testCase =>
+					typeof testCase === 'string' ? { code: testCase } : testCase
+				),
+				...(ruleModule.tests?.invalid || []),
+			]
+
+			const selectTestCases = totalTestCases.filter(testCase =>
+				oneOrMoreTestCaseIsSkipped ? testCase.only : true
+			)
+
+			for (const key in config) {
+				if (config[key] === undefined) {
+					delete config[key]
+				}
+			}
+
+			return {
+				ruleName,
+				ruleModule,
+				config,
+				totalTestCases,
+				selectTestCases,
+			}
+		})
 
 	// Put rules that have zero and all-skipped test cases at the top respectively
 	ruleList.sort((left, right) => {
@@ -113,7 +186,7 @@ export default function test(
 
 	const stats = { pass: 0, fail: 0, skip: 0 }
 
-	for (const { ruleName, ruleModule, totalTestCases, selectTestCases } of ruleList) {
+	for (const { ruleName, ruleModule, config, totalTestCases, selectTestCases } of ruleList) {
 		if (totalTestCases.length === 0) {
 			log('⚪ ' + ruleName + ` (0)`)
 			continue
@@ -132,7 +205,16 @@ export default function test(
 		const failures = []
 		for (const { only, ...testCase } of selectTestCases) {
 			try {
-				tester.run(
+				new RuleTester(
+					Object.keys(config).length > 0
+						? config
+						: {
+							languageOptions: {
+								ecmaVersion: 'latest',
+								sourceType: 'module',
+							}
+						}
+				).run(
 					ruleName,
 					ruleModule,
 					// Run one test case at a time

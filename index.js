@@ -2,7 +2,6 @@
 
 // @ts-check
 
-import fp from 'path'
 import { globSync } from 'glob'
 import { pathToFileURL } from 'url'
 import pessimist from '@thisismanta/pessimist'
@@ -27,50 +26,20 @@ if (filePathList.length === 0) {
 // Sort ascending as Glob does not guarantee array order
 filePathList.sort()
 
-/**
- * @type {Record<string, import('eslint').Rule.RuleModule & import('./test.js').Tests>}
- */
-const rules = {}
-for (const filePath of filePathList) {
-	const module = (await import(filePath)).default
+const fileList = await Promise.all(
+	filePathList.map(async (filePath) => {
+		const module = (await import(filePath)).default
+		return { filePath, module }
+	})
+)
 
-	if (
-		typeof module === 'object' && module &&
-		'rules' in module && typeof module.rules === 'object' && module.rules
-	) {
-		const pluginShortName = (() => {
-			if ('meta' in module && typeof module.meta?.name === 'string') {
-				return module.meta.name + '/'
-			}
-
-			// Backward compatibility
-			if (typeof module.name === 'string') {
-				return module.name + '/'
-			}
-
-			return ''
-		})().replace(/^eslint-plugin-/, '')
-
-		for (const ruleName in module.rules) {
-			rules[pluginShortName + ruleName] = module.rules[ruleName]
-		}
-
-	} else if (
-		typeof module === 'object' && module &&
-		'create' in module && typeof module.create === 'function'
-	) {
-		const derivedRuleName = fp.basename(filePath, fp.extname(filePath))
-		rules[derivedRuleName] = module
-
-	} else {
-		throw new Error(`Expected file "${filePath}" to be an ESLint plugin or rule.`)
+const errorCount = test(
+	fileList,
+	{
+		bail,
+		log: silent ? () => { } : console.log,
+		err: console.log,
 	}
-}
-
-const errorCount = test(rules, {
-	bail,
-	log: silent ? () => { } : console.log,
-	err: console.log,
-})
+)
 
 process.exit(errorCount)

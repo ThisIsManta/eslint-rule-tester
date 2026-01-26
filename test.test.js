@@ -174,10 +174,16 @@ it('returns non-zero code, given no passing test case', () => {
 		       endLine: 1,
 		       endColumn: 8
 		     }
-		   ] (1 strictEqual 0)
+		   ]
+		   
+		   1 !== 0
+		    (1 strictEqual 0)
 
 		   code: 1 
-		   Should have 1 error but had 0: [] (0 strictEqual 1)"
+		   Should have 1 error but had 0: []
+		   
+		   0 !== 1
+		    (0 strictEqual 1)"
 	`)
 })
 
@@ -231,7 +237,10 @@ it('returns exactly one code, given bailing out', () => {
 		       endLine: 1,
 		       endColumn: 8
 		     }
-		   ] (1 strictEqual 0)"
+		   ]
+		   
+		   1 !== 0
+		    (1 strictEqual 0)"
 	`)
 })
 

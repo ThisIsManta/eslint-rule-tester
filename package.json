@@ -2,6 +2,10 @@
 	"name": "eslint-rule-tester",
 	"version": "2.0.0",
 	"description": "A command-line interface for running ESLint rule unit tests",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ThisIsManta/eslint-rule-tester.git"
+	},
 	"type": "module",
 	"bin": "index.js",
 	"files": [
@@ -13,7 +17,7 @@
 	},
 	"scripts": {
 		"test": "vitest",
-		"version": "npm publish"
+		"version": "npm publish --provenance --access public"
 	},
 	"keywords": [
 		"eslint"

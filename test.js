@@ -11,6 +11,7 @@ import chalk from 'chalk'
 /**
  * @param {Tests['tests'] | Array<import('eslint').RuleTester.ValidTestCase> | import('eslint').RuleTester.ValidTestCase} input
  */
+// @ts-ignore
 export function only(input) {
 	// Support `only('...')` as in `valid: ['...']`
 	if (typeof input === 'string') {
@@ -19,6 +20,7 @@ export function only(input) {
 
 	// Support `valid: only([...])` and `invalid: only([...])`
 	if (Array.isArray(input)) {
+		// @ts-ignore
 		return input.map(testCase => only(testCase))
 	}
 
@@ -40,6 +42,7 @@ export function only(input) {
 	return input
 }
 
+// @ts-ignore
 global.only = only
 
 /**
@@ -148,7 +151,9 @@ export default function test(
 				oneOrMoreTestCaseIsSkipped ? testCase.only : true
 			)
 
-			for (const key in config) {
+			/** @type {keyof typeof config} */
+			let key
+			for (key in config) {
 				if (config[key] === undefined) {
 					delete config[key]
 				}
@@ -200,7 +205,7 @@ export default function test(
 		}
 
 		/**
-			* @type {Array<import('eslint').RuleTester.ValidTestCase & { error: Error }>} failures
+			* @type {Array<import('eslint').RuleTester.ValidTestCase & { error: string }>} failures
 			*/
 		const failures = []
 		for (const { only, ...testCase } of selectTestCases) {
@@ -224,7 +229,20 @@ export default function test(
 				)
 
 			} catch (error) {
-				failures.push({ ...testCase, error })
+				failures.push({
+					...testCase,
+					error: (() => {
+						if (error instanceof Error) {
+							if ('code' in error && error.code === 'ERR_ASSERTION') {
+								return error.message
+							}
+
+							return error.stack || error.message
+						}
+
+						return String(error)
+					})(),
+				})
 
 				if (bail) {
 					break
@@ -254,7 +272,7 @@ export default function test(
 					err('   ' + chalk.underline('options') + ': ' + format(3, JSON.stringify(testCase.options, null, 2)).trimStart())
 				}
 
-				err(chalk.red(format(3, error.message)))
+				err(chalk.red(format(3, error)))
 
 				if (bail) {
 					return 1

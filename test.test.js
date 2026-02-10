@@ -170,7 +170,6 @@ it('returns non-zero code, given no passing test case', () => {
 		       message: 'bar',
 		       line: 1,
 		       column: 1,
-		       nodeType: 'Program',
 		       endLine: 1,
 		       endColumn: 8
 		     }
@@ -233,7 +232,6 @@ it('returns exactly one code, given bailing out', () => {
 		       message: 'bar',
 		       line: 1,
 		       column: 1,
-		       nodeType: 'Program',
 		       endLine: 1,
 		       endColumn: 8
 		     }
@@ -484,4 +482,55 @@ it('accepts rules, plugins and configs as inputs', () => {
 		 PASS  3"
 	`)
 	expect(err).not.toHaveBeenCalled()
+})
+
+it('returns the stack trace, given a non-assertion error', () => {
+	const rules = {
+		foo: {
+			create(context) {
+				return {
+					Program(node) {
+						throw new Error('Syntax error')
+					}
+				}
+			},
+			tests: {
+				valid: [''],
+			}
+		}
+	}
+
+	const input = {
+		filePath: 'plugin.js',
+		module: {
+			rules
+		}
+	}
+
+	const log = vi.fn()
+	const err = vi.fn()
+	const errorCount = test([input], { log, err })
+
+	expect(errorCount).toBe(1)
+	expect(err.mock.calls.join('\n')).toMatchInlineSnapshot(`
+		"🔴 plugin/foo (1/1)
+
+		   code: 1 
+		   Error: Syntax error
+		   Occurred while linting <input>:1
+		   Rule: "rule-to-test/plugin/foo"
+		       roughly at RuleTester.run.valid[0] (/Users/manta/Documents/GitHub/eslint-rule-tester/test.js:233)
+		       roughly at RuleTester.run.valid (/Users/manta/Documents/GitHub/eslint-rule-tester/test.js:227)
+		       at RuleTester.run (/Users/manta/Documents/GitHub/eslint-rule-tester/test.js:227:7)
+		       at Program (/Users/manta/Documents/GitHub/eslint-rule-tester/test.test.js:493:13)
+		       at ruleErrorHandler (/Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/linter.js:645:33)
+		       at /Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/source-code-visitor.js:76:46
+		       at Array.forEach (<anonymous>)
+		       at SourceCodeVisitor.callSync (/Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/source-code-visitor.js:76:30)
+		       at /Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/source-code-traverser.js:291:18
+		       at Array.forEach (<anonymous>)
+		       at SourceCodeTraverser.traverseSync (/Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/source-code-traverser.js:290:10)
+		       at runRules (/Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/linter.js:686:12)
+		       at Linter.#flatVerifyWithoutProcessors (/Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/linter.js:1248:4)"
+	`)
 })

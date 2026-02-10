@@ -1,6 +1,6 @@
 {
 	"name": "eslint-rule-tester",
-	"version": "3.0.0",
+	"version": "9.0.0",
 	"description": "A command-line interface for running ESLint rule unit tests",
 	"repository": {
 		"type": "git",
@@ -25,12 +25,12 @@
 	"author": "thisismanta@gmail.com",
 	"license": "MIT",
 	"peerDependencies": {
-		"eslint": ">=9.7.0"
+		"eslint": ">=10.0.0"
 	},
 	"devDependencies": {
-		"@thisismanta/semantic-version": "^9.1.4",
-		"@types/node": "~22.13.14",
-		"eslint": "9.39.0",
+		"@thisismanta/semantic-version": "^10.0.0",
+		"@types/node": "~22.13.17",
+		"eslint": "^10.0.0",
 		"lefthook": "^2.0.15",
 		"vitest": "^4.0.18"
 	},

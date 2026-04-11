@@ -531,6 +531,6 @@ it('returns the stack trace, given a non-assertion error', () => {
 		       at Array.forEach (<anonymous>)
 		       at SourceCodeTraverser.traverseSync (/Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/source-code-traverser.js:290:10)
 		       at runRules (/Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/linter.js:686:12)
-		       at Linter.#flatVerifyWithoutProcessors (/Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/linter.js:1248:4)"
+		       at Linter.#flatVerifyWithoutProcessors (/Users/manta/Documents/GitHub/eslint-rule-tester/node_modules/eslint/lib/linter/linter.js:1264:4)"
 	`)
 })

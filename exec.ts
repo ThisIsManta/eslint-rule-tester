@@ -22,16 +22,18 @@ if (inputPathList.length === 0) {
 	throw new Error('Expected one or more command-line arguments pointing to files containing ESLint plugins or rules.')
 }
 
+const fileExtensionPattern = /\.test\.((c|m)?(j|t)sx?)$/
+
 const testPathList = Array.from(inputPathList).flatMap(inputPath => {
 	if (isDirectory(inputPath)) {
-		return globSync(fp.join(inputPath, '*.test.js'), { absolute: true })
+		return globSync(fp.join(inputPath, '*.test.{js,jsx,ts,tsx,mjs,mts,cjs,cts}'), { absolute: true })
 	}
 
-	return [inputPath].filter(path => /\.test\.js$/.test(path))
+	return [inputPath].filter(path => fileExtensionPattern.test(path))
 }).map(path => pathToFileURL(path).href)
 
 if (testPathList.length === 0) {
-	throw new Error('Expected the given command-line arguments to match *.test.js file but got none.')
+	throw new Error('Expected the given command-line arguments to match *.test.* file but got none.')
 }
 
 // Sort ascending as Glob does not guarantee array order
@@ -46,7 +48,7 @@ const testSpecList: Array<{
 }> = []
 
 for (const testPath of testPathList) {
-	const ruleName = fp.basename(testPath, '.test.js')
+	const ruleName = fp.basename(testPath).replace(fileExtensionPattern, '')
 
 	const { default: defaultExported } = await import(testPath)
 

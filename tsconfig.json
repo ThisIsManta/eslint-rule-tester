@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "exactOptionalPropertyTypes": true,
+    "isolatedModules": false,
+    "lib": [
+      "esnext"
+    ],
+    "module": "node20",
+    "noUncheckedIndexedAccess": true,
+    "noUncheckedSideEffectImports": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2020",
+    "types": [
+      "node"
+    ],
+    "verbatimModuleSyntax": true,
+  },
+  "exclude": [
+    "*.test.ts"
+  ]
+}

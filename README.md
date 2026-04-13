@@ -1,81 +1,79 @@
 A command-line interface for running [ESLint rule unit tests](https://eslint.org/docs/latest/extend/custom-rules#rule-unit-tests) powered by the official [RuleTester](https://eslint.org/docs/latest/integrate/nodejs-api#ruletester) API.
 
-## Running the unit tests
+## Running the test
 
 ```sh
-npm exec eslint-rule-tester <...path>
+npm install eslint-rule-tester
+
+npm exec eslint-rule-tester -- [--bail] [--silent] <...path>
 ```
-where `<...path>` is one or more [Glob patterns](https://www.npmjs.com/package/glob#Glob-Primer), which can be mixed of..
-- JavaScript file exporting [ESLint plugin](https://eslint.org/docs/latest/extend/plugins), for example,  
-	```js
-	module.exports = {
-		// See https://eslint.org/docs/latest/extend/plugins#creating-a-plugin
-		rules: {
-			'rule-name': {
-				// See https://eslint.org/docs/latest/extend/custom-rules#rule-structure
-				tests: { valid: [], invalid: [] }
+Where `<...path>` is one or more [Glob patterns](https://www.npmjs.com/package/glob#Glob-Primer) pointing to `rule-name.test.js` files that look like the below.
+
+```js
+import { test } from 'eslint-rule-tester'
+
+// See https://eslint.org/docs/latest/extend/plugins#creating-a-plugin
+const plugin = {
+	meta: {
+		name: 'my-plugin'
+	},
+	rules: {
+		// ⚠️ The name of the file must match the rule name here.
+		'rule-name': {
+			create(context) {
+				// Your rule goes here
 			}
 		}
 	}
-	```
-- JavaScript file exporting [ESLint rule](https://eslint.org/docs/latest/extend/custom-rules), for example,  
-	```js
-	module.exports = {
-		// See https://eslint.org/docs/latest/extend/custom-rules#rule-structure
-		tests: { valid: [], invalid: [] }
+}
+
+// See https://eslint.org/docs/latest/extend/custom-rules#rule-structure
+const tests = {
+	valid: [],
+	invalid: []
+}
+
+// This represents the base configurations for the tests above.
+const options = {
+	// The below is the default.
+	languageOptions: {
+		ecmaVersion: 'latest',
+		sourceType: 'module',
 	}
-	```
+}
 
-The command returns the status code representing the number of **non-pass** test results.
+// The `test` function wraps the arguments into an object and provides type checking only.
+export default test(plugin, tests, options)
+```
 
-Optionally, the command accepts the following arguments:
+The command returns the status code representing the number of **non-passing** test results.
 
-|Argument|Description|
-|---|---|
-|`--bail`|Stop at the first failing test case.|
-|`--silent`|Print only failing test cases to the standard output.|
-
-## Running exclusive test cases
+## Running selective test cases
 
 To run fewer test cases for debugging purposes, choose one of the following approaches:
-- Set `only: true` in your test case as mentioned in [ESLint official documentations](https://eslint.org/docs/latest/integrate/nodejs-api#ruletester), for example,
+- Manually set `only: true` in your test case as mentioned in [ESLint official documentation](https://eslint.org/docs/latest/integrate/nodejs-api#ruletester), for example,
 	```js
-	module.exports = {
-		tests: {
-			valid: [
-				{
-					only: true,
-					code: '...'
-				}
-			],
-			invalid: [...]
-		}
+	const tests = {
+		valid: [
+			{
+				code: '...',
+				only: true
+			}
+		],
+		invalid: [...]
 	}
 	```
-- Wrap your test case with the global function `only` injected by this package, for example,
+- Wrap your test case(s) with the function `only` imported from this package, for example,
 	```js
-	module.exports = {
-		tests: {
-			valid: [
-				only({
-					code: '...'
-				})
-			],
-			invalid: []
-		}
-	}
-	```
-- Wrap `valid` and/or `invalid` arrays with the global function `only` injected by this package, for example,
-	```js
-	module.exports = {
-		tests: {
-			valid: only([
-				{
-					code: '...'
-				}
-			]),
-			invalid: only([])
-		}
+	import { only } from 'eslint-rule-tester'
+
+	const tests = {
+		valid: [
+			only({
+				code: '...'
+			})
+		],
+		invalid: only([...]) // This works too.
 	}
 	```
 
@@ -85,6 +83,7 @@ To run fewer test cases for debugging purposes, choose one of the following appr
 ⚪ import-path-from-closest-index
 🟢 react-sort-props
 🔴 require-name-after-file-name
+
  1 var something = require("./james-arthur")
 	 filename: ./rules/require-name-after-file-name.js
 	 options: [

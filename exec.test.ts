@@ -43,7 +43,7 @@ it('returns minus-one code, given no test cases at all', async () => {
 	await import('./exec.ts')
 
 	expect(process.exitCode).toBe(-1)
-	expect(console.log.mock.calls.join('\n')).toMatchInlineSnapshot(`
+	expect(vi.mocked(console.log).mock.calls.join('\n')).toMatchInlineSnapshot(`
 		"⚪ no-tests (0)
 
 		 PASS  0"
@@ -59,7 +59,7 @@ it('returns zero code, given all passing test case', async () => {
 	await import('./exec.ts')
 
 	expect(process.exitCode).toBe(0)
-	expect(console.log.mock.calls.join('\n')).toMatchInlineSnapshot(`
+	expect(vi.mocked(console.log).mock.calls.join('\n')).toMatchInlineSnapshot(`
 		"🟢 passing (3)
 
 		 PASS  3"
@@ -75,7 +75,7 @@ it('returns non-zero code, given no passing test case', async () => {
 	await import('./exec.ts')
 
 	expect(process.exitCode).toBe(2)
-	expect(console.log.mock.calls.join('\n')).toMatchInlineSnapshot(`
+	expect(vi.mocked(console.log).mock.calls.join('\n')).toMatchInlineSnapshot(`
 		"🔴 failing (2/2)
 
 		   code: 1 void(0)
@@ -115,7 +115,7 @@ it('returns exactly one code, given bailing out', async () => {
 	await import('./exec.ts')
 
 	expect(process.exitCode).toBe(1)
-	expect(console.log.mock.calls.join('\n')).toMatchInlineSnapshot(`
+	expect(vi.mocked(console.log).mock.calls.join('\n')).toMatchInlineSnapshot(`
 		"🔴 failing (1/2)
 
 		   code: 1 void(0)
@@ -149,7 +149,7 @@ it('runs exclusive test cases that have `only` field set to true', async () => {
 	await import('./exec.ts')
 
 	expect(process.exitCode).toBe(0)
-	expect(console.log.mock.calls.join('\n')).toMatchInlineSnapshot(`
+	expect(vi.mocked(console.log).mock.calls.join('\n')).toMatchInlineSnapshot(`
 		"🟡 only (1/2)
 
 		 SKIP  1
@@ -170,7 +170,7 @@ it('returns non-zero code, given a skipped test case on CI', async () => {
 	await import('./exec.ts')
 
 	expect(process.exitCode).toBe(1)
-	expect(console.log.mock.calls.join('\n')).toMatchInlineSnapshot(`
+	expect(vi.mocked(console.log).mock.calls.join('\n')).toMatchInlineSnapshot(`
 		"🟡 only (1/2)
 
 		 SKIP  1

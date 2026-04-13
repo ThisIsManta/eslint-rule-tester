@@ -3,9 +3,9 @@
 import fp from 'path'
 import { globSync } from 'glob'
 import { pathToFileURL } from 'url'
+import { styleText } from 'util'
 import { parseArguments, parseBoolean } from '@thisismanta/pessimist'
 import { type ESLint, RuleTester } from 'eslint'
-import chalk from 'chalk'
 
 import { isDirectory } from './file.js'
 import type { Tests, Options } from './main.js'
@@ -210,20 +210,20 @@ function main() {
 				err('')
 
 				if (testCase.name !== undefined) {
-					err('   ' + chalk.underline('name') + ': ' + testCase.name)
+					err('   ' + styleText('underline', 'name') + ': ' + testCase.name)
 				}
 
-				err('   ' + chalk.underline('code') + ': ' + format(9, testCase.code, true).trimStart())
+				err('   ' + styleText('underline', 'code') + ': ' + format(9, testCase.code, true).trimStart())
 
 				if (testCase.filename !== undefined) {
-					err('   ' + chalk.underline('filename') + ': ' + testCase.filename)
+					err('   ' + styleText('underline', 'filename') + ': ' + testCase.filename)
 				}
 
 				if (testCase.options !== undefined) {
-					err('   ' + chalk.underline('options') + ': ' + format(3, JSON.stringify(testCase.options, null, 2)).trimStart())
+					err('   ' + styleText('underline', 'options') + ': ' + format(3, JSON.stringify(testCase.options, null, 2)).trimStart())
 				}
 
-				err(chalk.red(format(3, error)))
+				err(styleText('red', format(3, error)))
 
 				if (bail) {
 					return 1
@@ -246,13 +246,13 @@ function main() {
 	log('')
 
 	if (outcome.skip > 0) {
-		log(chalk.bgHex('#0CAAEE')(chalk.white.bold(' SKIP ')) + ' ' + outcome.skip.toLocaleString())
+		log(styleText(['bgGray', 'white', 'bold'], ' SKIP ') + ' ' + outcome.skip.toLocaleString())
 	}
 
-	log(chalk.bgGreen(chalk.white.bold(' PASS ')) + ' ' + outcome.pass.toLocaleString())
+	log(styleText(['bgGreen', 'white', 'bold'], ' PASS ') + ' ' + outcome.pass.toLocaleString())
 
 	if (outcome.fail > 0) {
-		log(chalk.bgRed(chalk.white.bold(' FAIL ')) + ' ' + outcome.fail.toLocaleString())
+		log(styleText(['bgRed', 'white', 'bold'], ' FAIL ') + ' ' + outcome.fail.toLocaleString())
 	}
 
 	if (Object.values(outcome).every(count => count === 0)) {

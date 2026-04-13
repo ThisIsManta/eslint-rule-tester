@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { styleText } from 'util'
 
 export default function format(
 	offset: number,
@@ -10,7 +10,7 @@ export default function format(
 	const lineNumberDigitCount = lines.length.toString().length
 	return lines.map((line, lineIndex) => {
 		const lineNumber = lineNumberVisible
-			? chalk.blue((lineIndex + 1).toString().padStart(lineNumberDigitCount, ' ')) + ' '
+			? styleText('blue', (lineIndex + 1).toString().padStart(lineNumberDigitCount, ' ')) + ' '
 			: ''
 		return ' '.repeat(offset) + lineNumber + decorateLine(line)
 	}).join('\n')

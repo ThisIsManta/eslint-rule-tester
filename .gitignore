@@ -132,4 +132,3 @@ dist
 # Output files
 *.js
 *.d.ts
-!*.test.js

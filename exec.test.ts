@@ -1,19 +1,5 @@
 import { vi, afterEach, it, expect } from 'vitest'
 
-vi.mock('chalk', () => ({
-	default: ({
-		blue: (text) => text,
-		red: (text) => text,
-		bgRed: (text) => text,
-		bgGreen: (text) => text,
-		bgHex: () => (text) => text,
-		white: {
-			bold: (text) => text,
-		},
-		underline: (text) => text,
-	})
-}))
-
 vi.stubGlobal('console', {
 	log: vi.fn(),
 	warn: vi.fn(),

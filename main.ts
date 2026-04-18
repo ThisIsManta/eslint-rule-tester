@@ -1,4 +1,5 @@
 import type { ESLint, RuleTester } from 'eslint'
+import type * as Oxlint from '@oxlint/plugins'
 
 export type Tests = {
 	valid?: Array<string | RuleTester.ValidTestCase>,
@@ -10,7 +11,7 @@ export type Options = Omit<
 	'name' | 'plugins' | 'rules'
 >
 
-export function test(plugin: ESLint.Plugin, tests: Tests, options: Options = {}) {
+export function test(plugin: ESLint.Plugin | Oxlint.Plugin, tests: Tests, options: Options = {}) {
 	return { plugin, tests, options }
 }
 

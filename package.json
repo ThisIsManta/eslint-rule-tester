@@ -34,6 +34,7 @@
 		"eslint": ">=10.0.0"
 	},
 	"devDependencies": {
+		"@oxlint/plugins": "^1.60.0",
 		"@thisismanta/semantic-version": "^11.2.0",
 		"@types/node": "^22.19.17",
 		"eslint": "^10.2.0",

@@ -98,29 +98,20 @@ const ruleSpecList = testSpecList.map(({ ruleName, plugin, tests, options }) => 
 		oneOrMoreTestCaseIsSkipped ? testCase.only : true
 	)
 
-	const pluginName = plugin.meta?.name ?? plugin.name ?? 'undefined'
-
-	const language = Object.keys(plugin.languages || {})[0]
-
-	const tester = new RuleTester({
-		plugins: { [pluginName]: plugin },
-		...(
-			language ? {
-				language: pluginName + '/' + language
-			} : {
-				languageOptions: {
-					ecmaVersion: 'latest',
-					sourceType: 'module',
-				},
-			}
-		),
-		...options,
-	})
+	const pluginName = (plugin.meta?.name ?? plugin.name ?? 'rule-to-test').replace(/^eslint-plugin-/, '')
 
 	const rule = plugin.rules?.[ruleName]
 	if (!rule) {
 		throw new Error(`Expected the rule "${ruleName}" to exist in the given plugin.`)
 	}
+
+	const language = rule.meta?.languages?.find(language => language.startsWith(pluginName + '/'))
+
+	const tester = new RuleTester({
+		plugins: { [pluginName]: plugin },
+		...(language ? { language } : {}),
+		...options,
+	})
 
 	return {
 		ruleName,

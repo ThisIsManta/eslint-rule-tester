@@ -1,6 +1,6 @@
 {
 	"name": "eslint-rule-tester",
-	"version": "11.2.0",
+	"version": "11.3.0",
 	"description": "A command-line interface for running ESLint rule unit tests",
 	"repository": {
 		"type": "git",

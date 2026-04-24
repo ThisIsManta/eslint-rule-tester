@@ -7,7 +7,6 @@ import { styleText } from 'util'
 import { parseArguments, parseBoolean } from '@thisismanta/pessimist'
 import { type ESLint, RuleTester } from 'eslint'
 
-import { isDirectory } from './file.js'
 import type { Tests, Options } from './main.js'
 import format from './format.js'
 
@@ -18,19 +17,32 @@ const { bail, silent, ...inputPathList } = parseArguments(process.argv.slice(2),
 
 process.env.NODE_ENV = 'test'
 
-if (inputPathList.length === 0) {
-	throw new Error('Expected one or more command-line arguments pointing to files containing ESLint plugins or rules.')
-}
-
 const fileExtensionPattern = /\.test\.((c|m)?(j|t)sx?)$/
 
-const testPathList = Array.from(inputPathList).flatMap(inputPath => {
-	if (isDirectory(inputPath)) {
-		return globSync(fp.join(inputPath, '*.test.{js,jsx,ts,tsx,mjs,mts,cjs,cts}'), { absolute: true })
-	}
-
-	return [inputPath].filter(path => fileExtensionPattern.test(path))
-}).map(path => pathToFileURL(path).href)
+const testPathList = [...new Set(
+	inputPathList.length === 0
+		? globSync(
+			'**/*.test.{js,ts,mjs,mts,cjs,cts}',
+			{
+				ignore: '**/node_modules',
+				nodir: true,
+				absolute: true
+			}
+		)
+		: Array.from(inputPathList).flatMap(inputPath =>
+			globSync(
+				[
+					inputPath,
+					fp.join(inputPath, '**/*.test.{js,ts,mjs,mts,cjs,cts}')
+				],
+				{
+					ignore: ['**/node_modules', '!**/*.test.{js,ts,mjs,mts,cjs,cts}'],
+					nodir: true,
+					absolute: true
+				}
+			)
+		)
+)].map(path => pathToFileURL(path).href)
 
 if (testPathList.length === 0) {
 	throw new Error('Expected the given command-line arguments to match *.test.* file but got none.')

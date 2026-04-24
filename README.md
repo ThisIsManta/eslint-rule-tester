@@ -5,20 +5,17 @@ A command-line interface for running [ESLint rule unit tests](https://eslint.org
 ```sh
 npm install eslint-rule-tester
 
-npm exec eslint-rule-tester -- [--bail] [--silent] <...path>
+npm exec eslint-rule-tester -- [--bail] [--silent] [<...path>]
 ```
-Where `<...path>` is one or more [Glob patterns](https://www.npmjs.com/package/glob#Glob-Primer) pointing to `rule-name.test.js` files that look like the below.
+Where `<...path>` is zero or more [Glob patterns](https://www.npmjs.com/package/glob#Glob-Primer) pointing to `rule-name.test.js` files that look like the below.
 
 ```js
 import { test } from 'eslint-rule-tester'
 
 // See https://eslint.org/docs/latest/extend/plugins#creating-a-plugin
 const plugin = {
-	meta: {
-		name: 'my-plugin'
-	},
 	rules: {
-		// ⚠️ The name of the file must match the rule name here.
+		// ⚠️ The rule name should match the file name or else the tester will use the one rule specified here.
 		'rule-name': {
 			create(context) {
 				// Your rule goes here

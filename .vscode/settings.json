@@ -7,5 +7,6 @@
 		"**/Thumbs.db": true,
 		"*.js": true,
 		"*.d.ts": true,
-	}
+	},
+	"js/ts.tsdk.path": "node_modules/typescript/lib"
 }

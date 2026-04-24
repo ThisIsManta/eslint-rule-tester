@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "declaration": true,
     "exactOptionalPropertyTypes": true,
     "isolatedModules": false,
@@ -7,6 +8,7 @@
       "esnext"
     ],
     "module": "node20",
+    "noEmit": true,
     "noUncheckedIndexedAccess": true,
     "noUncheckedSideEffectImports": true,
     "skipLibCheck": true,
@@ -16,8 +18,5 @@
       "node"
     ],
     "verbatimModuleSyntax": true,
-  },
-  "exclude": [
-    "*.test.ts"
-  ]
+  }
 }

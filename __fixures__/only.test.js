@@ -1,7 +1,6 @@
 import { test } from '../main.ts'
 
 export default test({
-	meta: { name: 'plugin' },
 	rules: {
 		'only': {
 			create(context) {

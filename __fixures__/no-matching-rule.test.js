@@ -1,7 +1,6 @@
 import { test } from '../main.ts'
 
 export default test({
-	meta: { name: 'plugin' },
 	rules: {
 		'foo': {
 			create(context) {
@@ -19,6 +18,6 @@ export default test({
 		}
 	}
 }, {
-	valid: ['code'],
-	invalid: [{ code: 'code', errors: [{ message: 'message' }] }],
+	valid: [''],
+	invalid: [{ code: 'code', errors: [{ message: 'bar' }] }],
 })

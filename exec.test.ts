@@ -25,13 +25,15 @@ it('throws given an empty file', async () => {
 	})
 })
 
-it('throws given no matching rule', async () => {
+it('runs against the only rule provided in the plugin when the file name does not match any rule name', async () => {
 	vi.stubGlobal('process', {
 		...process,
 		argv: ['', '', './__fixures__/no-matching-rule.test.js'],
 	})
 
-	expect(import('./exec.ts')).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Expected the rule "no-matching-rule" to exist in the given plugin.]`)
+	await import('./exec.ts')
+
+	expect(process.exitCode).toBe(0)
 })
 
 it('returns minus-one code, given no test cases at all', async () => {

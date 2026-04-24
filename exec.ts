@@ -98,10 +98,14 @@ const ruleSpecList = testSpecList.map(({ ruleName, plugin, tests, options }) => 
 		oneOrMoreTestCaseIsSkipped ? testCase.only : true
 	)
 
-	const pluginName = (plugin.meta?.name ?? plugin.name ?? 'rule-to-test').replace(/^eslint-plugin-/, '')
+	const pluginName = (plugin.meta?.name ?? plugin.name ?? 'plugin').replace(/^eslint-plugin-/, '')
 
-	const rule = plugin.rules?.[ruleName]
-	if (!rule) {
+	if (typeof plugin.rules !== 'object' || plugin.rules === null) {
+		throw new Error('Expected rules to be defined in the given plugin.')
+	}
+
+	const rule = plugin.rules[ruleName] ?? (Object.values(plugin.rules).length === 1 ? Object.values(plugin.rules)[0] : undefined)
+	if (!rule || typeof rule !== 'object') {
 		throw new Error(`Expected the rule "${ruleName}" to exist in the given plugin.`)
 	}
 

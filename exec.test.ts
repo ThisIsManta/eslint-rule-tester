@@ -52,6 +52,17 @@ it('returns minus-one code, given no test cases at all', async () => {
 	`)
 })
 
+it('returns minus-one code, given no errors in an invalid test case', async () => {
+	vi.stubGlobal('process', {
+		...process,
+		argv: ['', '', './__fixures__/no-errors-in-invalid-tests.test.js'],
+	})
+
+	expect(() => import('./exec.ts')).rejects.toMatchObject({
+		message: 'Expected each invalid test case to have an "errors" array.'
+	})
+})
+
 it('returns zero code, given all passing test case', async () => {
 	vi.stubGlobal('process', {
 		...process,

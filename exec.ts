@@ -99,6 +99,15 @@ const oneOrMoreTestCaseIsSkipped = testSpecList
 	)
 
 const ruleSpecList = testSpecList.map(({ ruleName, plugin, tests, options }) => {
+	// Prevent an invalid test case to be mistaken as a valid one
+	if (tests.invalid) {
+		for (const testCase of tests.invalid) {
+			if (Array.isArray(testCase.errors) === false) {
+				throw new Error(`Expected each invalid test case to have an "errors" array.`)
+			}
+		}
+	}
+
 	const totalTestCases: Array<RuleTester.ValidTestCase | RuleTester.InvalidTestCase> = [
 		...(tests.valid || []).map(testCase =>
 			typeof testCase === 'string' ? { code: testCase } : testCase

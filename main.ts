@@ -8,7 +8,7 @@ export type Tests = {
 
 export type Options = Omit<
 	import('@eslint/core').ConfigObject,
-	'name' | 'plugins' | 'rules'
+	'name' | 'rules'
 >
 
 export function test(plugin: ESLint.Plugin | Oxlint.Plugin, tests: Tests, options: Options = {}) {

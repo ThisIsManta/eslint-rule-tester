@@ -20,7 +20,7 @@ it('throws given an empty file', async () => {
 		argv: ['', '', './__fixures__/empty.test.js'],
 	})
 
-	expect(import('./exec.ts')).rejects.toMatchObject({
+	await expect(import('./exec.ts')).rejects.toMatchObject({
 		message: /Expected "file:\/\/.+\/__fixures__\/empty\.test\.js" to have a default export\./
 	})
 })
@@ -58,7 +58,7 @@ it('returns minus-one code, given no errors in an invalid test case', async () =
 		argv: ['', '', './__fixures__/no-errors-in-invalid-tests.test.js'],
 	})
 
-	expect(() => import('./exec.ts')).rejects.toMatchObject({
+	await expect(() => import('./exec.ts')).rejects.toMatchObject({
 		message: 'Expected each invalid test case to have an "errors" array.'
 	})
 })
